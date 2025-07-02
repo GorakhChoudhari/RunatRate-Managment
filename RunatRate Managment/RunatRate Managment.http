@@ -1,0 +1,6 @@
+@RunatRate_Managment_HostAddress = http://localhost:5078
+
+GET {{RunatRate_Managment_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
