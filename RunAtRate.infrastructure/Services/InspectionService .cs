@@ -1,28 +1,13 @@
 ﻿using RunAtRate.Application.Interfaces.Services;
 using RunAtRate.Appllication.DTOs;
+using RunAtRate.Appllication.Interfaces.Repositories;
 
 
-public class InspectionService : IInspectionService
+public class InspectionService(AppDbContext _context, IInspectionRepostory _inspectionRepostory) : IInspectionService
 {
-    private readonly AppDbContext _context;
-
-    public InspectionService(AppDbContext context)
+public  Task<InspectionDto> GetInspectionByIdAsync(int id)
     {
-        _context = context;
-    }
-
-    public async Task<InspectionDto> GetInspectionByIdAsync(int id)
-    {
-        var inspection = await _context.Inspections.FindAsync(id);
-        if (inspection == null) return null;
-
-        return new InspectionDto
-        {
-            Id = inspection.Id,
-            PartName = inspection.PartName,
-            ScheduledDate = inspection.ScheduledDate,
-            Status = inspection.Status
-        };
+        return  _inspectionRepostory.GetInspectionByIdAsync(id);
     }
 }
 

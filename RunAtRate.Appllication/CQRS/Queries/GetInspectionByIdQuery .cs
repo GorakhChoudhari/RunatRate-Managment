@@ -8,3 +8,4 @@ public class GetInspectionByIdQuery : IRequest<InspectionDto>
     public int Id { get; set; }
 }
 
+

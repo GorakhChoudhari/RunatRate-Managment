@@ -1,11 +1,10 @@
 ﻿
+
 using RunAtRate.Appllication.DTOs;
 
-namespace RunAtRate.Application.Interfaces.Services;
+namespace RunAtRate.Appllication.Interfaces.Repositories;
 
-public interface IInspectionService
+public  interface IInspectionRepostory
 {
     Task<InspectionDto> GetInspectionByIdAsync(int id);
-
 }
-

@@ -3,8 +3,10 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RunAtRate.Application;
 using RunAtRate.Application.Interfaces.Services;
+using RunAtRate.Appllication.Interfaces.Repositories;
 using RunAtRate.Core.Interfaces;
 using RunAtRate.infrastructure.Data;
+using RunAtRate.infrastructure.Repositories;
 using RunAtRate.Infrastructure.Repositories;
 
 
@@ -19,7 +21,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IInspectionService, InspectionService>();
-
+builder.Services.AddScoped<IInspectionRepostory, InspectionRepository>();    
 
 // Add MediatR
 builder.Services.AddMediatR(typeof(ApplicationAssemblyMarker).Assembly);
