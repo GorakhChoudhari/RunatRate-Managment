@@ -1,0 +1,178 @@
+-- ============================================
+-- DATABASE CREATION
+-- ============================================
+CREATE DATABASE ManufacturingDB;
+GO
+USE ManufacturingDB;
+GO
+
+-- ============================================
+-- MASTER TABLES
+-- ============================================
+CREATE TABLE Countries (
+    CountryID INT PRIMARY KEY IDENTITY(1,1),
+    CountryName VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY IDENTITY(1,1),
+    CustomerName VARCHAR(150) NOT NULL,
+    Email VARCHAR(150) UNIQUE NOT NULL,
+    Phone VARCHAR(20),
+    CountryID INT FOREIGN KEY REFERENCES Countries(CountryID)
+);
+
+CREATE TABLE Suppliers (
+    SupplierID INT PRIMARY KEY IDENTITY(1,1),
+    SupplierName VARCHAR(150) NOT NULL,
+    ContactEmail VARCHAR(150),
+    ContactPhone VARCHAR(20),
+    CountryID INT FOREIGN KEY REFERENCES Countries(CountryID)
+);
+
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY IDENTITY(1,1),
+    FirstName VARCHAR(100) NOT NULL,
+    LastName VARCHAR(100) NOT NULL,
+    Email VARCHAR(150) UNIQUE NOT NULL,
+    Phone VARCHAR(20),
+    HireDate DATE NOT NULL,
+    ManagerID INT NULL FOREIGN KEY REFERENCES Employees(EmployeeID)
+);
+
+-- ============================================
+-- PRODUCT & INVENTORY
+-- ============================================
+CREATE TABLE Categories (
+    CategoryID INT PRIMARY KEY IDENTITY(1,1),
+    CategoryName VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY IDENTITY(1,1),
+    ProductName VARCHAR(150) NOT NULL,
+    CategoryID INT FOREIGN KEY REFERENCES Categories(CategoryID),
+    SupplierID INT FOREIGN KEY REFERENCES Suppliers(SupplierID),
+    Price DECIMAL(10,2) NOT NULL,
+    Stock INT DEFAULT 0,
+    CONSTRAINT UQ_Product UNIQUE(ProductName, SupplierID)
+);
+
+CREATE TABLE Warehouses (
+    WarehouseID INT PRIMARY KEY IDENTITY(1,1),
+    WarehouseName VARCHAR(100) NOT NULL,
+    Location VARCHAR(200)
+);
+
+CREATE TABLE Inventory (
+    InventoryID INT PRIMARY KEY IDENTITY(1,1),
+    ProductID INT FOREIGN KEY REFERENCES Products(ProductID),
+    WarehouseID INT FOREIGN KEY REFERENCES Warehouses(WarehouseID),
+    Quantity INT NOT NULL,
+    CONSTRAINT UQ_Inventory UNIQUE(ProductID, WarehouseID)
+);
+
+-- ============================================
+-- SALES & ORDERS
+-- ============================================
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY IDENTITY(1,1),
+    CustomerID INT FOREIGN KEY REFERENCES Customers(CustomerID),
+    OrderDate DATETIME DEFAULT GETDATE(),
+    Status VARCHAR(50) DEFAULT 'Pending'
+);
+
+CREATE TABLE OrderDetails (
+    OrderDetailID INT PRIMARY KEY IDENTITY(1,1),
+    OrderID INT FOREIGN KEY REFERENCES Orders(OrderID),
+    ProductID INT FOREIGN KEY REFERENCES Products(ProductID),
+    Quantity INT NOT NULL,
+    UnitPrice DECIMAL(10,2) NOT NULL,
+    CONSTRAINT UQ_OrderDetail UNIQUE(OrderID, ProductID)
+);
+
+CREATE TABLE Payments (
+    PaymentID INT PRIMARY KEY IDENTITY(1,1),
+    OrderID INT FOREIGN KEY REFERENCES Orders(OrderID),
+    Amount DECIMAL(10,2) NOT NULL,
+    PaymentDate DATETIME DEFAULT GETDATE(),
+    PaymentMethod VARCHAR(50) CHECK (PaymentMethod IN ('Cash','Card','UPI','NetBanking'))
+);
+
+-- ============================================
+-- PRODUCTION & QUALITY
+-- ============================================
+CREATE TABLE ProductionBatches (
+    BatchID INT PRIMARY KEY IDENTITY(1,1),
+    ProductID INT FOREIGN KEY REFERENCES Products(ProductID),
+    ProducedDate DATE NOT NULL,
+    QuantityProduced INT NOT NULL
+);
+
+CREATE TABLE QualityChecks (
+    QCID INT PRIMARY KEY IDENTITY(1,1),
+    BatchID INT FOREIGN KEY REFERENCES ProductionBatches(BatchID),
+    CheckedBy INT FOREIGN KEY REFERENCES Employees(EmployeeID),
+    QCDate DATE NOT NULL,
+    Result VARCHAR(50) CHECK (Result IN ('Pass','Fail'))
+);
+
+-- ============================================
+-- INDEXES
+-- ============================================
+CREATE INDEX IX_Customers_CountryID ON Customers(CountryID);
+CREATE INDEX IX_Products_CategoryID ON Products(CategoryID);
+CREATE INDEX IX_Orders_CustomerID ON Orders(CustomerID);
+CREATE INDEX IX_OrderDetails_OrderID ON OrderDetails(OrderID);
+CREATE INDEX IX_Inventory_ProductID ON Inventory(ProductID);
+CREATE INDEX IX_Payments_OrderID ON Payments(OrderID);
+
+-- ============================================
+-- SAMPLE DATA
+-- ============================================
+INSERT INTO Countries (CountryName) VALUES ('India'), ('USA'), ('Germany');
+
+INSERT INTO Customers (CustomerName, Email, Phone, CountryID) VALUES
+('Reliance Retail','reliance@mail.com','9876543210',1),
+('Amazon India','amazon@mail.com','9123456789',1),
+('Walmart US','walmart@mail.com','8765432109',2);
+
+INSERT INTO Suppliers (SupplierName, ContactEmail, ContactPhone, CountryID) VALUES
+('Tata Steel','tata@mail.com','9988776655',1),
+('Bosch','bosch@mail.com','8899776655',3);
+
+INSERT INTO Employees (FirstName, LastName, Email, Phone, HireDate, ManagerID) VALUES
+('Ravi','Sharma','ravi@mail.com','9000000001','2020-01-01',NULL),
+('Sneha','Patil','sneha@mail.com','9000000002','2021-05-10',1);
+
+INSERT INTO Categories (CategoryName) VALUES ('Automobile'), ('Electronics');
+
+INSERT INTO Products (ProductName, CategoryID, SupplierID, Price, Stock) VALUES
+('Car Engine',1,1,250000.00,10),
+('Brake System',1,2,50000.00,20),
+('Smartphone',2,2,30000.00,50);
+
+INSERT INTO Warehouses (WarehouseName, Location) VALUES
+('Pune WH','Pune'), ('Mumbai WH','Mumbai');
+
+INSERT INTO Inventory (ProductID, WarehouseID, Quantity) VALUES
+(1,1,5), (2,1,10), (3,2,20);
+
+INSERT INTO Orders (CustomerID, OrderDate, Status) VALUES
+(1, GETDATE(),'Completed'),
+(2, GETDATE(),'Pending');
+
+INSERT INTO OrderDetails (OrderID, ProductID, Quantity, UnitPrice) VALUES
+(1,1,1,250000.00),
+(1,2,2,50000.00),
+(2,3,1,30000.00);
+
+INSERT INTO Payments (OrderID, Amount, PaymentDate, PaymentMethod) VALUES
+(1,350000.00,GETDATE(),'UPI');
+
+INSERT INTO ProductionBatches (ProductID, ProducedDate, QuantityProduced) VALUES
+(1,'2025-09-01',5), (2,'2025-09-02',10);
+
+INSERT INTO QualityChecks (BatchID, CheckedBy, QCDate, Result) VALUES
+(1,1,'2025-09-03','Pass'),
+(2,2,'2025-09-04','Fail');

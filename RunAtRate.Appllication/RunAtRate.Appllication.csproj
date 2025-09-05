@@ -9,6 +9,7 @@
   <ItemGroup>
     <Folder Include="CQRS\commands\" />
     <Folder Include="CQRS\Handlers\CommandHandlers\" />
+    <Folder Include="Constatnts\" />
   </ItemGroup>
 
   <ItemGroup>

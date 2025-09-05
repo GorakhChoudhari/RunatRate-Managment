@@ -3,7 +3,7 @@ using RunAtRate.Appllication.DTOs;
 using RunAtRate.Appllication.Interfaces.Repositories;
 
 
-public class InspectionService(AppDbContext _context, IInspectionRepostory _inspectionRepostory) : IInspectionService
+public class InspectionService(IInspectionRepostory _inspectionRepostory) : IInspectionService
 {
 public  Task<InspectionDto> GetInspectionByIdAsync(int id)
     {
